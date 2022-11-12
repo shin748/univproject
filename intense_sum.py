@@ -41,7 +41,7 @@ class dicom_intense:
         while True:
             frame = self.extract_bv(dicom_img[i][0:dicom_img.shape[1], 0:dicom_img.shape[2]-50], preprocess) #True=전처리, False=원본
 
-            intense_sum = frame.sum()
+            intense_sum = frame.sum() #i번째 프레임의 intense 개수
 
             mat_i.append(i)
             mat_x.append(intense_sum)
@@ -60,31 +60,4 @@ class dicom_intense:
         #print(f'프레임: {mat_i}\n 벡터수: {mat_x}')
         cv2.destroyAllWindows()
         return mat_i, mat_x
-    
-    def peak_interpolation(self, mat_i, mat_x):
-        prev_x=mat_x[0]
-        incr=1
-        peak_i=[]; peak_x=[]
-        ###########  피크탐색  ###################
-        for i in mat_i:
-            i-=1         
-            if prev_x >= mat_x[i]: #감소중
-                if incr==1:
-                    peak_i.append(i+1); peak_x.append(prev_x) #증가하다 감소시작 = 피크위치만 저장
-                    incr=0 #증가 종료를 알림
-                prev_x = mat_x[i]
-
-            elif prev_x < mat_x[i]:
-                incr=1 #증가하면 증가시작을 알림
-                prev_x = mat_x[i]
-        
-        ###########  보간진행  ###################
-        f = interpolate.interp1d(peak_i, peak_x, kind='linear')
-        if mat_i[-1] > peak_i[-1]: mat_i = mat_i[0:peak_i[-1]]
-        f_y = f(mat_i)
-        return plt.plot(mat_i, f_y, '-', color='lime')
-
-
-
-
 ###############################################################################################################################################

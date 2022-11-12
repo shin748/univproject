@@ -35,7 +35,7 @@ class dicom_optflow:
         h = dicom_img.shape[1]-50; w = dicom_img.shape[2]-50
         prev = None                             #이전 프레임 저장 변수
         delay=int(1000/30); i=0                 #재생관련 변수
-        mat_i=[]; mat_x=[]; mat_y=[]            #분포 측정관련 변수
+        mat_i=[0]; mat_x=[0]; mat_y=[]          #분포 측정관련 변수 (0을 넣는 이유는 첫 프레임은 값이 없어 저장되지 않기 때문)
 
         ################################
         while True:
@@ -91,31 +91,5 @@ class dicom_optflow:
         #print(f'프레임: {mat_i}\n 벡터수: {mat_x}')
         cv2.destroyAllWindows()
         return mat_i, mat_x
-    
-    def peak_interpolation(self, mat_i, mat_x):
-        prev_x=mat_x[0]
-        incr=1
-        peak_i=[]; peak_x=[]
-        ###########  피크탐색  ###################
-        for i in mat_i:
-            i-=1         
-            if prev_x >= mat_x[i]: #감소중
-                if incr==1:
-                    peak_i.append(i+1); peak_x.append(prev_x) #증가하다 감소시작 = 피크위치만 저장
-                    incr=0 #증가 종료를 알림
-                prev_x = mat_x[i]
-
-            elif prev_x < mat_x[i]:
-                incr=1 #증가하면 증가시작을 알림
-                prev_x = mat_x[i]
-        
-        ###########  보간진행  ###################
-        f = interpolate.interp1d(peak_i, peak_x, kind='linear')
-        if mat_i[-1] > peak_i[-1]: mat_i = mat_i[0:peak_i[-1]]
-        f_y = f(mat_i)
-        return plt.plot(mat_i, f_y, '-', color='lime')
-
-
-
 
 ###############################################################################################################################################
