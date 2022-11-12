@@ -3,8 +3,8 @@ import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
-#옵티컬 플로우 클래스
-class dicom_optflow:
+#밝기값 클래스
+class dicom_intense:
     ##############       전처리 함수     ########################
     def extract_bv(self, image, preprocess):
         if preprocess == False: return image
@@ -30,55 +30,24 @@ class dicom_optflow:
         return f6
 
    #################       옵티컬플로우 함수   #####################
-    def do_optflow(self, dicom_img, all_frame, preprocess):
+    def do_intense(self, dicom_img, all_frame, preprocess):
         ################################
         h = dicom_img.shape[1]-50; w = dicom_img.shape[2]-50
         prev = None                             #이전 프레임 저장 변수
         delay=int(1000/30); i=0                 #재생관련 변수
         mat_i=[]; mat_x=[]; mat_y=[]            #분포 측정관련 변수
-
+        print(h,w)
         ################################
         while True:
             frame = self.extract_bv(dicom_img[i][0:dicom_img.shape[1], 0:dicom_img.shape[2]-50], preprocess) #True=전처리, False=원본
-            flow_frame = frame.copy() #옵티컬 플로우 시각화를 위한 점과 벡터
-            h = frame.shape[0]; w = frame.shape[1]
-            max = 0
-            if prev is None: prev = frame
-            else:
-                flow = cv2.calcOpticalFlowFarneback(prev,frame,None,0.5,3, 10, 3,5,1.5,cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
 
-                ######################################옵티컬 플로우 시각화 파트
-                cnt_vec=0; step=16 #step수에 따라 파악하는 (x,y)개수가 달라짐
-                idx_y,idx_x = np.mgrid[step/2:h:step , step/2:w:step].astype(np.int)
-                grid = np.stack( (idx_x,idx_y), axis =-1).reshape(-1,2) #그리드 점 찍기
+            intense_sum = frame.sum()
 
-                for x,y in grid:
-                    cv2.circle(flow_frame, (x,y), 1, (255,255,0), 1) #점 찍기
-                    dx,dy = flow[y, x].astype(np.int)
-                    ################################################
-                    '''
-                    dx=0이면 y축으로만 움직이니 수직벡터, dy=0이면 x축으로만 움직이니 수평벡터
-                    dx>0이면 우측, dy>0이면 아래로 뻗음.
-
-                    수평벡터는 무시하는게 좋아보임.
-
-                    하향(위에서 아래)벡터: dy>0 -> (dx==0, dy>0) or (dx>0, dy>0) or (dx<0, dy>0)
-                    상향(아래에서 위)벡터: dy<0 -> (dx==0, dy<0) or (dx>0, dy<0) or (dx<0, dy<0)
-                    '''
-                    ###############################################
-                    if dx>=0 and dy>3: #(x,y) -> (x+dx, y+dy)
-                        #if(same_vec[y][x]>0): continue
-                        #same_vec[y][x]+=1
-                        cnt_vec+=1 #벡터 카운팅
-                        cv2.line(flow_frame, (x,y), (x+dx, y+dy), (255,255, 0),2)
-
-                mat_i.append(i); mat_x.append(cnt_vec) #i=프레임, x=벡터수
-
-                prev = frame
-            ####################### else 종료 #################################
+            mat_i.append(i)
+            mat_x.append(intense_sum)
 
             ###############################동영상 재생처리 부분
-            cv2.imshow('make it', flow_frame)
+            cv2.imshow('make it', frame)
 
             i+=1
             if i >= all_frame: break
