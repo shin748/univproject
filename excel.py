@@ -11,7 +11,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 #엑셀파일로 경로를 파악하기 위한 클래스 (+벡터수 저장/확인용 함수)
 class excel:
-    df = pd.read_excel('C:/Users/USERH/Desktop/ESCARGOT/ESCARGOT.xlsx')
+    df = pd.read_excel('경로/ESCARGOT.xlsx')
 
     def __init__(self):
         self.drop_df = self.df.drop([0,2,4,9,11,22,34,38,43,49], axis=0, inplace=False)
@@ -25,10 +25,10 @@ class excel:
         if pat_num == -1: #모든 경로를 추출하고 싶을 때
             for i in self.didx:
                 num = self.drop_df['Img_bas_n'][i].astype(int)
-                paths.append('C:/Users/USERH/Desktop/ESCARGOT/' + f'{i+1}/{i+1}({num}).dcm')
+                paths.append('경로/' + f'{i+1}/{i+1}({num}).dcm')
         else: #특정 경로만 추출하고 싶을 때
             num = self.df['Img_bas_n'][self.idx[pat_num]].astype(int)
-            paths = 'C:/Users/USERH/Desktop/ESCARGOT/' + f'{pat_num+1}/{pat_num+1}({num}).dcm'
+            paths = '경로/' + f'{pat_num+1}/{pat_num+1}({num}).dcm'
 
         return paths
     #####################################################
@@ -62,7 +62,7 @@ class excel:
             ##엑셀속 frame count 표시
             plt.axvspan(self.drop_df['TFC_start_b'][k].astype(int), self.drop_df['TFC_end_b'][k].astype(int), facecolor='red')
             plt.axvspan(self.drop_df['CCFC_start_b'][k].astype(int), self.drop_df['CCFC_end_b'][k].astype(int), facecolor='blue')
-            plt.savefig('C:/Users/USERH/Desktop/all_plot/'+f'{k+1}.png')
+            plt.savefig('경로/'+f'{k+1}.png')
             plt.clf()
     ####################################################
 
