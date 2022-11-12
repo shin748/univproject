@@ -122,6 +122,6 @@ class excel:
         f_y = f(interp_i)
         return interp_i, f_y
 
-    def data_interpolation(self, mat_i, mat_x):
+    def data_interpolation(self, mat_i, mat_x): ##
         poly_reg = LinearRegression()
         quad = PolynomialFeatures(degree=2)
