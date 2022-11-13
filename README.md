@@ -4,7 +4,7 @@
  pat_num: 환자번호 <br/>
  preprocess: 전처리 True/False <br/>
  interpolate: 피크보간 True/False <br/>
- cycle: 피크보간 횟수 <br/>
+ cycle: 피크보간 횟수 !!!!!!!! 이 버전에선 1이외에 기입하지 말 것!!!!!!!!!!!<br/>
  opt: 옵티컬 플로우 사용 True/False (False시 intensity) <br/>
 
 # 2. excel
