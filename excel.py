@@ -1,5 +1,6 @@
 import pydicom
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from optflow import dicom_optflow
 from intense_sum import dicom_intense
@@ -51,8 +52,8 @@ class excel:
             ##보간사용/미사용
             k = self.didx[i]
             plt.plot(mat_i, mat_x, color='black')
-
             colors = ['lime', 'orange', 'purple', 'gold', 'grey']
+
             if interpolate == False: plt.plot(mat_i, mat_x, color='lime')
             else:
                 for i in range(cycle):
@@ -62,7 +63,7 @@ class excel:
             ##엑셀속 frame count 표시
             plt.axvspan(self.drop_df['TFC_start_b'][k].astype(int), self.drop_df['TFC_end_b'][k].astype(int), facecolor='red')
             plt.axvspan(self.drop_df['CCFC_start_b'][k].astype(int), self.drop_df['CCFC_end_b'][k].astype(int), facecolor='blue')
-            plt.savefig('경로/'+f'{k+1}.png')
+            plt.savefig('C:/Users/USERH/Desktop/all_plot/'+f'{k+1}.png')
             plt.clf()
     ####################################################
 
@@ -86,8 +87,30 @@ class excel:
         if interpolate == False: plt.plot(mat_i, mat_x, color='black')
         else:
             for i in range(cycle):
-                interp_i, mat_x = self.peak_interpolation(mat_i, mat_x)
-                plt.plot(interp_i, mat_x, '-', color=colors[i])
+                interp_i1, mat_x1 = self.peak_interpolation(mat_i, mat_x) #1차 보간
+                interp_i2, mat_x2 = self.peak_interpolation(mat_i, mat_x1) #2차 보간
+                avgx = np.mean(mat_x2) + (0.3*max(mat_x2))
+
+                prev_x=mat_x2[0]
+                first_pk=-1
+                if prev_x < mat_x2[1]: incr=1
+                else: incr=0
+
+                for j in interp_i2[1:]:
+                    if prev_x >= mat_x2[j]:
+                        #print(f'prev_x={prev_x}, avgx={avgx}')
+                        if incr==1 and prev_x >=avgx: #피크점인데 평균값보다 큰 경우면 우리가 찾는 높은 피크점
+                            first_pk = j; break
+                        else: incr=0
+                    elif prev_x < mat_x2[j]: incr=1 #증가하면 증가시작을 알림    
+                    prev_x = mat_x[j]
+
+                #print(f'first_pk={first_pk}')
+                plt.plot(interp_i1, mat_x1, '-', color=colors[i])
+                p1, p2 = self.data_interpolation(8, mat_i[:first_pk], interp_i1[:first_pk], mat_x1[:first_pk]) #0~구한 피크점까지, 1차 보간에 regression모델 적용
+                plt.plot(p1, p2, '-', color=colors[i+1])
+                p3, p4 = self.data_interpolation(4, mat_i[first_pk:], interp_i1[first_pk:], mat_x1[first_pk:]) #구한 피크점~끝까지, 1차 보간에 regression모델 적용
+                plt.plot(p3, p4, '-', color=colors[i+2])
 
         ##엑셀속 frame count 표시
         plt.axvspan(self.df['TFC_start_b'][k].astype(int), self.df['TFC_end_b'][k].astype(int), facecolor='red')
@@ -96,9 +119,10 @@ class excel:
     ########################################################
 
 
+
     def peak_interpolation(self, mat_i, mat_x):
         prev_x=mat_x[0]
-        peak_i=[]; peak_x=[]
+        peak_i=[0]; peak_x=[mat_x[0]]
         if prev_x < mat_x[1]: incr=1
         else: incr=0
 
@@ -110,18 +134,25 @@ class excel:
                 if incr==1: #증가하다가 감소시작한거면 = 피크
                     peak_i.append(i); peak_x.append(prev_x)
                     incr=0 #감소시작을 알림
-            elif prev_x < mat_x[i]:
-                incr=1 #증가하면 증가시작을 알림
-
+            elif prev_x < mat_x[i]: incr=1 #증가하면 증가시작을 알림    
             prev_x = mat_x[i]
         
         ###########  보간진행  ###################
         #print(f'peak_i = {peak_i}({len(peak_i)}개), peak_x = {peak_x}({len(peak_x)}개)')
         f = interpolate.interp1d(peak_i, peak_x, kind='quadratic')
-        interp_i = mat_i[peak_i[0]:peak_i[-1]+1]
+        interp_i = np.array(mat_i[peak_i[0]:peak_i[-1]+1])
         f_y = f(interp_i)
         return interp_i, f_y
 
-    def data_interpolation(self, mat_i, mat_x): ##
-        poly_reg = LinearRegression()
-        quad = PolynomialFeatures(degree=2)
+    def data_interpolation(self, poly_num, mat_i, interp_i, mat_x):
+        #학습데이터: (interp_i, mat_x)
+        #예측데이터: (mat_i, ?)
+        poly = PolynomialFeatures(degree=poly_num)
+        xnew = poly.fit_transform(interp_i.reshape(-1,1)) #degree차수에 맞는 범위까지, 새로운 학습용 x데이터 생성 (reshape와 같은 형태여야 하나봄)
+        r = LinearRegression()
+        r.fit(xnew, mat_x) #새로운 x를 포함하여 학습
+
+        mat_i2 = np.array(mat_i).reshape(-1,1)
+        ypred = r.predict(poly.transform(mat_i2)) #예측용 데이터 x도 그에 맞게 범위확장시키고, y값 예측
+        return mat_i2, ypred #(x,y)반환
+
