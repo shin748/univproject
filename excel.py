@@ -20,10 +20,10 @@ class excel:
         if pat_num == -1: #모든 경로를 추출하고 싶을 때
             for i in self.didx:
                 num = self.drop_df['Img_bas_n'][i].astype(int)
-                paths.append('C:/Users/USERH/Desktop/ESCARGOT/' + f'{i+1}/{i+1}({num}).dcm')
+                paths.append('경로/' + f'{i+1}/{i+1}({num}).dcm')
         else: #특정 경로만 추출하고 싶을 때
             num = self.df['Img_bas_n'][self.idx[pat_num]].astype(int)
-            paths = 'C:/Users/USERH/Desktop/ESCARGOT/' + f'{pat_num+1}/{pat_num+1}({num}).dcm'
+            paths = '경로/' + f'{pat_num+1}/{pat_num+1}({num}).dcm'
 
         return paths
 
