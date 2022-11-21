@@ -9,7 +9,7 @@ def main():
     #excel().set_all_plot(save=False, preprocess=True, interpolate=True, cycle=1, opt=False)
     #preprocess: 전처리 사용/미사용
     #interpolate: 피크 보간법 사용/미사용
-    #cycle: 보간 횟수(적정은 2회일듯)
+    #cycle: 보간 횟수(적정은 1회)
     #opt: 옵티컬플로우 사용 / 밝기값 사용
     
 if __name__ == '__main__': main()
