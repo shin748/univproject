@@ -13,16 +13,16 @@
   ```별도의 denoise된 npy를 지정하므로 denoise(5번 참조)가 적용된 파일이 필요```
 
 # 3. data_analysis
- 1) 클러스터링을 통해 낮은 값과 높은 값을 분리한 다음
+ 1) 클러스터링을 통해 낮은 값과 높은 값을 분리
  2) 높은 값 그룹을 polynomial regression을 통해 2차함수로 피팅하여 미분
  3) 도출된 극댓값을 기준으로 좌측의 낮은 값 그룹의 끝 프레임을 이용해 TFC를 출력
  4) 우측의 낮은 값 그룹의 시작 프레임을 이용해 CCFC 출력 (튜닝값 수정중)
 
 # 4. interpolation
- 노이즈 제거 차원에서의 피크점만을 잇는 스무딩을 수행함.
+ 노이즈 제거 차원에서의 피크점만을 잇는 스무딩을 수행함. <br/>
  polynomial regression과 미분에 대한 메소드 또한 존재
 
 # 5. intense_sum, optflow, preprocess
- intense_sum은 intensity counting
- optflow는  ```if dx>=0 and dy>3:```의 dx, dy값을 수정하여 벡터길이를 조작
+ intense_sum은 intensity counting <br/>
+ optflow는  ```if dx>=0 and dy>3:```의 dx, dy값을 수정하여 벡터길이를 조작 <br/>
  preprocess는 전처리(denoise를 수행할 경우 별도의 사전저장)
