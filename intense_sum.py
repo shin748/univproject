@@ -2,44 +2,22 @@ import cv2
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
+from preprocessing import do_preprocess
 
 #밝기값 클래스
 class dicom_intense:
-    ##############       전처리 함수     ########################
-    def extract_bv(self, image, preprocess):
-        if preprocess == False: return image
-
-        # blurring image(median method)
-        blured_image = cv2.medianBlur(image, 7)
-
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        contrast_enhanced_fundus = clahe.apply(blured_image)
-
-        # opening and closing operation
-        r1 = cv2.morphologyEx(contrast_enhanced_fundus, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)), iterations = 1)
-        R1 = cv2.morphologyEx(r1, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)), iterations = 1)
-        r2 = cv2.morphologyEx(R1, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11,11)), iterations = 1)
-        R2 = cv2.morphologyEx(r2, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11,11)), iterations = 1)
-        r3 = cv2.morphologyEx(R2, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(23,23)), iterations = 1)
-        R3 = cv2.morphologyEx(r3, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(23,23)), iterations = 1)
-        f4 = cv2.subtract(R3,contrast_enhanced_fundus)
-        f5 = clahe.apply(f4)
-
-        # contour thresholding
-        ret,f6 = cv2.threshold(f5, 70, 255, cv2.THRESH_BINARY)
-        return f6
-
    #################       옵티컬플로우 함수   #####################
     def do_intense(self, dicom_img, all_frame, preprocess):
         ################################
-        h = dicom_img.shape[1]-50; w = dicom_img.shape[2]-50
+        h = dicom_img.shape[1]; w = dicom_img.shape[2]
         prev = None                             #이전 프레임 저장 변수
-        delay=int(1000/30); i=0                 #재생관련 변수
+        delay=int(60/30); i=0                 #재생관련 변수
         mat_i=[]; mat_x=[]; mat_y=[]            #분포 측정관련 변수
-        print(h,w)
+        #print(dicom_img.shape)
         ################################
         while True:
-            frame = self.extract_bv(dicom_img[i][0:dicom_img.shape[1], 0:dicom_img.shape[2]-50], preprocess) #True=전처리, False=원본
+            #frame = do_preprocess().proc_data(dicom_img[i][int(h/2):h, 0:w-50], preprocess) #True=전처리, False=원본
+            frame = do_preprocess().extract_bv(dicom_img[i][:h, :w-50], preprocess) #True=전처리, False=원본
 
             intense_sum = frame.sum() #i번째 프레임의 intense 개수
 
