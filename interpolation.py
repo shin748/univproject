@@ -47,9 +47,10 @@ class interp:
         #fit_transform: 훈련집합이 가진 평균,분산의 분포에 맞게 정규화하는 것
         #trasnform: fit_transform으로 얻은 정규화값들에 맞게끔 테스트집합의 입력값을 스케일링(맞추는 것)
         poly = PolynomialFeatures(degree=poly_num)
-        xnew = poly.fit_transform(interp_i.reshape(-1,1)) #interp_i를 degree차 함수에 맞는 x값으로 스케일링=변형(reshape와 같은 형태여야 하나봄)
+        new_i = poly.fit_transform(interp_i.reshape(-1,1)) #interp_i를 degree차 함수에 맞는 x값으로 스케일링=변형(reshape와 같은 형태여야 하나봄)
+        
         r = LinearRegression()
-        r.fit(xnew, mat_x) #degree차 함수에 맞게 변형된 훈련집합의 x값과 y값인 (x,y)로 회귀모델 학습(=예측값 계산)
+        r.fit(new_i, mat_x) #degree차 함수에 맞게 변형된 훈련집합의 x값과 y값인 (x,y)로 회귀모델 학습(=예측값 계산)
 
         mat_i2 = np.array(mat_i).reshape(-1,1)
         ypred = r.predict(poly.transform(mat_i2)) #예측용 x좌표도 이전 다항식에 맞게 변형시키고, 학습한 모델(r)로 y값 예측
@@ -58,28 +59,31 @@ class interp:
         #print(r.coef_) #계수 확인
         
         ############################
-        deg = poly_num+1 #deg차 다항식
-        coef = r.coef_ #다항식의 계수
+        deg = poly_num #deg차 다항식
+        coef =  r.coef_#다항식의 계수
+        #print(coef)
 
         if deriv == True:  return mat_i2, ypred, self.deriv(deg, coef) #극값도 반환
-        else: return mat_i2, ypred #(x,y)반환
+        else: return mat_i, ypred #(x,y)반환
     ##############################################
 
     def deriv(self, deg, coef): #계수로 식을 제작하여 미분
         x = sp.symbols('x'); sstr = ''
         #print(np.round(coef,2))
-        for i in range(deg):
+        for i in range(deg+1):
             if coef[i]<0: sstr=sstr.rstrip('+') #음수인 경우만 특수처리
             sstr+=str(np.round(coef[i],2)) + '*x**' + str(i) + '+' #차수와 계수기반으로 다항식 작성
         sstr=sstr[:-1] #마지막 +는 제거
-        #sstr은 n차 다항식이 된다
         #print(sstr)
 
+        ############## ↑ 다항식 제작 완료 ↑ ###############
+        
         fx = sp.sympify(sstr)
-
+        #print(fx)
         f1 = sp.Derivative(fx, x).doit() #도함수
         f2 = sp.Derivative(f1,x).doit() #이계도함수
-        #print(f'fx = {fx}\nf1x = {f1}\nf2x = {f2}\n')
         
-        ex = sp.solve(f1) #극값위치 구하기
+        ex = sp.solve(f1) #극값의 x좌표구하기
+
+        #print(ex)
         return ex
