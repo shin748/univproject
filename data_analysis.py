@@ -120,13 +120,13 @@ class analysis:
 
         c_list3, group3 = self.clustering(2, True, True, mat_i2[group1_end:group1_end2], ypred[group1_end:group1_end2], color_start=2)
         group1_end3, group2_end3 = self.get_gsection(c_list3, group3)
-        group1_end3+=group1_end; group2_end3+=group1_end
+        group1_end3+=group1_end; group2_end3+=group1_end #부정확함. 수정 필요
         print(f'극대점쪽 {group1_end3}, {group2_end3}')
         max_ex = int((group1_end3 + group2_end3)/2)
 
         c_list4, group4 = self.clustering(2, True, True, mat_i2[group1_end2:gsize], ypred[group1_end2:gsize], color_start=2)
         group1_end4, group2_end4 = self.get_gsection(c_list4, group4)
-        group1_end4+=group1_end2; group2_end4=group1_end2
+        group1_end4+=group1_end2; group2_end4=group1_end2 #부정확함. 수정 필요
         print(f'극소점쪽 {group1_end4}, {group2_end4}')
         min_ex = int((group1_end4+group2_end4)/2)
 
