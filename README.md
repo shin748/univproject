@@ -2,6 +2,7 @@
  argv를 사용하지 않는 파일임<br/>
  가급적 ```excel().show_plot(환자번호, preprocess, interpolate, cycle=1, opt=False)```만 사용하길 바람 <br/>
  pat_num: 환자번호 <br/>
+ bas: 약 미투여 True/False <br/>
  preprocess: 전처리 True/False <br/>
  interpolate: 피크보간 True/False <br/>
  cycle=1: 피크보간 횟수 (현 시점에선 1로 사용할 것)<br/>
