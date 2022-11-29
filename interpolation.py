@@ -41,7 +41,7 @@ class interp:
 
 
     #################polynomial regression
-    def data_interpolation(self, poly_num, mat_i, interp_i, mat_x, deriv=False):
+    def data_interpolation(self, poly_num, mat_i, interp_i, mat_x, deriv=True):
         #학습데이터: (interp_i, mat_x). 피크보간값을 다항식으로 fitting시키고 싶기 때문
         #예측데이터: (mat_i, ?)
         #fit_transform: 훈련집합이 가진 평균,분산의 분포에 맞게 정규화하는 것
@@ -72,14 +72,14 @@ class interp:
         #print(np.round(coef,2))
         for i in range(deg+1):
             if coef[i]<0: sstr=sstr.rstrip('+') #음수인 경우만 특수처리
-            sstr+=str(np.round(coef[i],2)) + '*x**' + str(i) + '+' #차수와 계수기반으로 다항식 작성
+            sstr+=str(coef[i]) + '*x**' + str(i) + '+' #차수와 계수기반으로 다항식 작성
         sstr=sstr[:-1] #마지막 +는 제거
         #print(sstr)
 
         ############## ↑ 다항식 제작 완료 ↑ ###############
         
         fx = sp.sympify(sstr)
-        #print(fx)
+    
         f1 = sp.Derivative(fx, x).doit() #도함수
         f2 = sp.Derivative(f1,x).doit() #이계도함수
         
